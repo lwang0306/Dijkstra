@@ -1,0 +1,17 @@
+6 9
+philadelphia  1000 2400
+baltimore  2800 3000
+boston  2400 2500
+new_york  4000    0
+london  4500 3800
+sydney  6000 1500
+philadelphia baltimore
+philadelphia new_york
+baltimore boston
+baltimore london
+boston london
+boston new_york
+boston sydney
+new_york sydney
+london sydney
+
