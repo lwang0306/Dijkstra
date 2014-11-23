@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class WeightedGraph
 {
-	private Hashtable<String, Integer> names;	// 1-d array to store the labels of each vertex
+	private Hashtable<Integer, String> names;	// 1-d array to store the labels of each vertex
 	private double[] x;		// 1-d array to store x-coordinate of each vertex
 	private double[] y;		// 1-d array to store y-coordinate of each vertex
 	private EdgeLinkList[] Edges;	// 1-d array to store adjacencies between vertices
@@ -21,7 +21,7 @@ public class WeightedGraph
 	// Constructor that sets aside as much capacity as specified by the user
 	public WeightedGraph(int capacity)	
 	{			
-		names = new Hashtable<String, Integer>(capacity);
+		names = new Hashtable<Integer, String>(capacity);
 		x = new double[capacity];
 		y = new double[capacity];
 		Edges = new EdgeLinkList[capacity];
@@ -58,16 +58,17 @@ public class WeightedGraph
 	
 		// Finds the name of Vertices by the location at which a vertex is stored in Vertices. 
 		// Returns null if location not found
-		public String getName(int index)
+		public int getIndex(String vertex)
 		{
-			String key = null;
-			for (Map.Entry<String, Integer> entry : names.entrySet()) {
-				if (index == entry.getValue().intValue()) {
+			Integer key = null;
+			for (Map.Entry<Integer, String> entry : names.entrySet()) {
+				if (vertex.equals(entry.getValue())) {
 					key = entry.getKey();
 					break;
 				}
 			}
-			return key;
+			if (key == null) return -1;
+			else return key.intValue();
 		}
 
 	// Resizes the array of vertices. Can make it larger or smaller, depending
@@ -85,9 +86,9 @@ public class WeightedGraph
 //
 //		return temp;
 //	}
-	private Hashtable<String, Integer> resize(Hashtable<String, Integer> table, int newSize) {
-		Hashtable<String, Integer> resizedTable = new Hashtable<String, Integer>(newSize);
-		for (Map.Entry<String, Integer> entry:table.entrySet()) {
+	private Hashtable<Integer, String> resize(Hashtable<Integer, String> table, int newSize) {
+		Hashtable<Integer, String> resizedTable = new Hashtable<Integer, String>(newSize);
+		for (Map.Entry<Integer, String> entry:table.entrySet()) {
 			resizedTable.put(entry.getKey(), entry.getValue());
 		}
 		return resizedTable;
@@ -136,7 +137,7 @@ public class WeightedGraph
 	public void addVertex(String newVertex, double xcoord, double ycoord)
 	{
 //		if(getIndex(newVertex) != -1)
-		if(names.containsKey(newVertex))
+		if (names.containsValue(newVertex))
 		{
 			System.out.print("addVertex: ");
 			System.out.print(newVertex);
@@ -156,7 +157,7 @@ public class WeightedGraph
 		}
 
 //		names[numVertices] = newVertex;
-		names.put(newVertex, new Integer(numVertices));
+		names.put(new Integer(numVertices), newVertex);
 		x[numVertices] = xcoord;
 		y[numVertices++] = ycoord;
 	}
@@ -170,7 +171,7 @@ public class WeightedGraph
 //		int j = getIndex(vertex2);
 
 
-		if(!names.containsKey(vertex1))
+		if(!names.containsValue(vertex1))
 		{
 			System.out.print("addEdge failed: ");
 //			System.out.print("index " + i);
@@ -179,7 +180,7 @@ public class WeightedGraph
 			return;
 		}
 
-		if(!names.containsKey(vertex2))
+		if(!names.containsValue(vertex2))
 		{
 			System.out.print("addEdge failed: ");
 //			System.out.print("index " + j);
@@ -188,8 +189,10 @@ public class WeightedGraph
 			return;
 		}
 		
-		int i = names.get(vertex1).intValue();
-		int j = names.get(vertex2).intValue();
+//		int i = names.get(vertex1).intValue();
+//		int j = names.get(vertex2).intValue();
+		int i = getIndex(vertex1);
+		int j = getIndex(vertex2);
 		//TODO Laziness
 
 		double x1 = x[i];
@@ -199,7 +202,7 @@ public class WeightedGraph
 		double diffX = x1 - x2;
 		double diffY = y1 - y2;
 		double dist = Math.sqrt(diffX*diffX + diffY*diffY);
-		addEdge(vertex1, vertex2, dist);
+		addEdge(i, j, dist);
 	}
 
 	// Adds a new edge with weight w. The edge is specified by
@@ -224,67 +227,67 @@ public class WeightedGraph
 
 //		Edges[i].insertFirst(names[j], w);
 //		Edges[j].insertFirst(names[i], w);
-		Edges[i].insertFirst(getName(j), w);
-		Edges[j].insertFirst(getName(i), w);
+		Edges[i].insertFirst(names.get(new Integer(j)), w);
+		Edges[j].insertFirst(names.get(new Integer(i)), w);
 
 		numEdges++;
 	}
 
 
 	// Adds a new edge with weight w
-	public void addEdge(String vertex1, String vertex2, double w)
-	{
-//		int i = getIndex(vertex1);
-//		int j = getIndex(vertex2);
+//	public void addEdge(String vertex1, String vertex2, double w)
+//	{
+////		int i = getIndex(vertex1);
+////		int j = getIndex(vertex2);
+////		int i = names.get(vertex1).intValue();
+////		int j = names.get(vertex2).intValue();
+//
+////		if(i == -1)
+//		if (!names.containsValue(vertex1))
+//		{
+//			System.out.print("addEdge failed: ");
+//			System.out.print(vertex1);
+//			System.out.println(" does not exist.");
+//			return;
+//		}
+//
+//		if(!names.containsValue(vertex2))
+//		{
+//			System.out.print("addEdge failed: ");
+//			System.out.print(vertex2);
+//			System.out.println(" does not exist.");
+//			return;
+//		}
+//		
 //		int i = names.get(vertex1).intValue();
 //		int j = names.get(vertex2).intValue();
-
-//		if(i == -1)
-		if (!names.containsKey(vertex1))
-		{
-			System.out.print("addEdge failed: ");
-			System.out.print(vertex1);
-			System.out.println(" does not exist.");
-			return;
-		}
-
-		if(!names.containsKey(vertex2))
-		{
-			System.out.print("addEdge failed: ");
-			System.out.print(vertex2);
-			System.out.println(" does not exist.");
-			return;
-		}
-		
-		int i = names.get(vertex1).intValue();
-		int j = names.get(vertex2).intValue();
-		//TODO laziness
-
-		addEdge(i, j, w);
-	}
+//		//TODO laziness
+//
+//		addEdge(i, j, w);
+//	}
 
 
 
 
-	// returns the names of all the neighbors of a given vertex in a 
-	// String array
-	private String[] getNeighbors(String vertex)
-	{
-//		int source = getIndex(vertex);
+//	// returns the names of all the neighbors of a given vertex in a 
+//	// String array
+//	private String[] getNeighbors(String vertex)
+//	{
+////		int source = getIndex(vertex);
+////		int source = names.get(vertex);
+//		if(!names.containsValue(vertex))
+//		{
+//			System.out.print("getNeighbors failed: Vertex ");
+//			System.out.print(vertex);
+//			System.out.println(" does not exist.");
+//			return null;
+//		}
+//		
 //		int source = names.get(vertex);
-		if(!names.containsKey(vertex))
-		{
-			System.out.print("getNeighbors failed: Vertex ");
-			System.out.print(vertex);
-			System.out.println(" does not exist.");
-			return null;
-		}
-		
-		int source = names.get(vertex);
-		//TODO  laziness
-		
-		return Edges[source].copyIntoArray();
-	}
+//		//TODO  laziness
+//		
+//		return Edges[source].copyIntoArray();
+//	}
 
 	// returns the indices of all the neighbors of a given vertex. The
 	// vertex is specified as an index and the neighbors are returned
@@ -303,15 +306,17 @@ public class WeightedGraph
 
 		// Call the earlier getNeighbors function to get the names of
 		// neighbors
-		String[] nbrNames = getNeighbors(getName(index));
+//		String[] nbrNames = getNeighbors(names.get(new Integer(index)));
 //		String[] nbrNames = getNeighbors(name);
+		
+		String[] nbrNames = Edges[index].copyIntoArray();
 
 		// Turn the array of neighbor names into an array
 		// of neighbor indices
 		int[] nbrIndices = new int[nbrNames.length];
 		for(int i = 0; i < nbrIndices.length; i++)
-//			nbrIndices[i] = getIndex(nbrNames[i]);
-			nbrIndices[i] = names.get(nbrNames[i]);
+			nbrIndices[i] = getIndex(nbrNames[i]);
+//			nbrIndices[i] = names.get(nbrNames[i]);
 
 		return nbrIndices;
 	}
@@ -338,7 +343,7 @@ public class WeightedGraph
 
 		// Look for vertex j in Edges[i]
 //		EdgeLink e = Edges[i].find(names[j]);
-		EdgeLink e = Edges[i].find(getName(j));
+		EdgeLink e = Edges[i].find(names.get(new Integer(j)));
 
 		// If vertex j is found in Edges[i] then return the weight of
 		// the edge, otherwise return null
@@ -357,11 +362,11 @@ public class WeightedGraph
 	public String[] shortestPath(String source, String dest)
 	{
 		// Get index of source
-//		int sourceIndex = getIndex(source);
-		int sourceIndex = names.get(source);
+		int sourceIndex = getIndex(source);
+//		int sourceIndex = names.get(source);
 		// Get index of destination
-//		int destIndex = getIndex(dest);
-		int destIndex = names.get(dest);
+		int destIndex = getIndex(dest);
+//		int destIndex = names.get(dest);
 
 		if(sourceIndex == -1)
 		{
@@ -379,7 +384,7 @@ public class WeightedGraph
 		}
 
 		// Perform DSP from destination
-		int[] spTree = DSP(dest);
+		int[] spTree = DSP(destIndex);
 		
 		// If source is unreachable from destination
 		if(spTree[sourceIndex] == -1)
@@ -388,7 +393,7 @@ public class WeightedGraph
 		// Define a String[] for shortest path and place the source vertex in it
 		String[] path = new String[numVertices];
 //		path[0] = names[sourceIndex];		
-		path[0] = getName(sourceIndex);
+		path[0] = names.get(new Integer(sourceIndex));
 
 		// Start following parent pointers and store each new vertex
 		// encountered, in the path array. The while-loop executes
@@ -400,7 +405,7 @@ public class WeightedGraph
 			currentIndex = spTree[currentIndex];
 			pathLength++;
 //			path[pathLength] = names[currentIndex];
-			path[pathLength] = getName(currentIndex);
+			path[pathLength] = names.get(new Integer(currentIndex));
 		}
 
 		// Resize the path array to be exactly of the correct size
@@ -417,11 +422,11 @@ public class WeightedGraph
 	public double shortestPathCost(String source, String dest)
 	{
 		// Get index of source
-//		int sourceIndex = getIndex(source);
-		int sourceIndex = names.get(source);
+		int sourceIndex = getIndex(source);
+//		int sourceIndex = names.get(source);
 		// Get index of destination
-//		int destIndex = getIndex(dest);
-		int destIndex = names.get(dest);
+		int destIndex = getIndex(dest);
+//		int destIndex = names.get(dest);
 
 		if(sourceIndex == -1)
 		{
@@ -440,7 +445,7 @@ public class WeightedGraph
 		}
 
 		// Perform DSP from destination
-		int[] spTree = DSP(dest);
+		int[] spTree = DSP(destIndex);
 
 		// If source is unreachable from destination
 		if(spTree[sourceIndex] == -1)
@@ -472,11 +477,12 @@ public class WeightedGraph
 	 * traversing from vertex #k back to the source.
 	 */
 
-	private int[] DSP(String source)
+//	private int[] DSP(String source)
+	private int[] DSP(int sourceIndex)
 	{
 
 //		int sourceIndex = getIndex(source);
-		int sourceIndex = names.get(source);
+//		int sourceIndex = names.get(source);
 
 		// Declarations
 		double[] dist = new double[numVertices];
