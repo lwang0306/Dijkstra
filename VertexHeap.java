@@ -113,7 +113,7 @@ public class VertexHeap
 
 		double oldValue = heapArray[index].getPriority(); // remember old
 		heapArray[index].setPriority(newPriority);  // change to new
-		heapArray[index].setParent(newParent);  // change to new
+//		heapArray[index].setParent(newParent);  // change to new
 
 		if(oldValue > newPriority)             // if raised,
 			trickleUp(index);                // trickle it up

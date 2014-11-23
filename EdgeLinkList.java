@@ -85,6 +85,8 @@ public class EdgeLinkList
 		if(first == null)
 			first = newNode;
 
+		// TODO: laziness?? add an else clause
+		
 		// otherwise scan to the end of the list
 		EdgeLink current = first;
 		while(current.next != null)

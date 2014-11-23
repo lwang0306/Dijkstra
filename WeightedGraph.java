@@ -1,8 +1,11 @@
 import java.lang.Math;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Map;
 
 public class WeightedGraph
 {
-	private String[] names;	// 1-d array to store the labels of each vertex
+	private Hashtable<String, Integer> names;	// 1-d array to store the labels of each vertex
 	private double[] x;		// 1-d array to store x-coordinate of each vertex
 	private double[] y;		// 1-d array to store y-coordinate of each vertex
 	private EdgeLinkList[] Edges;	// 1-d array to store adjacencies between vertices
@@ -18,7 +21,7 @@ public class WeightedGraph
 	// Constructor that sets aside as much capacity as specified by the user
 	public WeightedGraph(int capacity)	
 	{			
-		names = new String[capacity];
+		names = new Hashtable<String, Integer>(capacity);
 		x = new double[capacity];
 		y = new double[capacity];
 		Edges = new EdgeLinkList[capacity];
@@ -38,31 +41,56 @@ public class WeightedGraph
 		return numEdges;
 	}
 
-	// Finds the location at which a vertex is stored in Vertices. 
-	// Returns -1 if vertex not found
-	public int getIndex(String vertex)
-	{
-		for(int i = 0; i < numVertices; i++)
-			if(vertex.equals(names[i]))
-				return i;
-
-		return -1;
-	}
+//	// Finds the location at which a vertex is stored in Vertices. 
+//	// Returns -1 if vertex not found
+//	public int getIndex(String vertex)
+//	{
+//		Integer key = null;
+//		for (Map.Entry entry:names.entrySet()) {
+//			if (vertex.equals(entry.getValue())) {
+//				key = (Integer) entry.getKey();
+//				break;
+//			}
+//		}
+//		if (key == null) return -1;
+//		else return key.intValue();
+//	}
+	
+		// Finds the name of Vertices by the location at which a vertex is stored in Vertices. 
+		// Returns null if location not found
+		public String getName(int index)
+		{
+			String key = null;
+			for (Map.Entry<String, Integer> entry : names.entrySet()) {
+				if (index == entry.getValue().intValue()) {
+					key = entry.getKey();
+					break;
+				}
+			}
+			return key;
+		}
 
 	// Resizes the array of vertices. Can make it larger or smaller, depending
 	// on what newSize is. 
-	private String[] resize(String[] array, int newSize)
-	{
-		String[] temp = new String[newSize];
-
-		int smallerSize = newSize;
-		if(array.length < smallerSize)
-			smallerSize = array.length;
-
-		for(int i = 0; i < smallerSize; i++)
-			temp[i] = array[i];
-
-		return temp;
+//	private String[] resize(String[] array, int newSize)
+//	{
+//		String[] temp = new String[newSize];
+//
+//		int smallerSize = newSize;
+//		if(array.length < smallerSize)
+//			smallerSize = array.length;
+//
+//		for(int i = 0; i < smallerSize; i++)
+//			temp[i] = array[i];
+//
+//		return temp;
+//	}
+	private Hashtable<String, Integer> resize(Hashtable<String, Integer> table, int newSize) {
+		Hashtable<String, Integer> resizedTable = new Hashtable<String, Integer>(newSize);
+		for (Map.Entry<String, Integer> entry:table.entrySet()) {
+			resizedTable.put(entry.getKey(), entry.getValue());
+		}
+		return resizedTable;
 	}
 
 	// Resizes the array of coordinates. Can make it larger or smaller, depending
@@ -107,7 +135,8 @@ public class WeightedGraph
 	// Adds a new vertex
 	public void addVertex(String newVertex, double xcoord, double ycoord)
 	{
-		if(getIndex(newVertex) != -1)
+//		if(getIndex(newVertex) != -1)
+		if(names.containsKey(newVertex))
 		{
 			System.out.print("addVertex: ");
 			System.out.print(newVertex);
@@ -117,15 +146,17 @@ public class WeightedGraph
 
 		// if array of vertices is full, we need to expand it and 
 		// also expand Edges
-		if (names.length == numVertices)
+		if (names.size() == numVertices)
 		{
+//			names = resize(names, 2*numVertices+1);
 			names = resize(names, 2*numVertices+1);
 			x = resize(x, 2*numVertices+1);
 			y = resize(y, 2*numVertices+1);
 			Edges = resize(Edges, 2*numVertices+1);
 		}
 
-		names[numVertices] = newVertex;
+//		names[numVertices] = newVertex;
+		names.put(newVertex, new Integer(numVertices));
 		x[numVertices] = xcoord;
 		y[numVertices++] = ycoord;
 	}
@@ -135,24 +166,31 @@ public class WeightedGraph
 	// Adds a new weighted edge. The edge is specified by
 	// indices of endpoints and the weight equals the Euclidean distance.
 	public void addWeightedEdge(String vertex1, String vertex2) {
-		int i = getIndex(vertex1);
-		int j = getIndex(vertex2);
+//		int i = getIndex(vertex1);
+//		int j = getIndex(vertex2);
 
-		if((i < 0) || (i > numVertices-1))
+
+		if(!names.containsKey(vertex1))
 		{
 			System.out.print("addEdge failed: ");
-			System.out.print("index " + i);
+//			System.out.print("index " + i);
+			System.out.print("index");
 			System.out.println(" is out of bounds.");
 			return;
 		}
 
-		if((j < 0) || (j > numVertices-1))
+		if(!names.containsKey(vertex2))
 		{
 			System.out.print("addEdge failed: ");
-			System.out.print("index " + j);
+//			System.out.print("index " + j);
+			System.out.print("index");
 			System.out.println(" is out of bounds.");
 			return;
 		}
+		
+		int i = names.get(vertex1).intValue();
+		int j = names.get(vertex2).intValue();
+		//TODO Laziness
 
 		double x1 = x[i];
 		double y1 = y[i];
@@ -184,8 +222,10 @@ public class WeightedGraph
 			return;
 		}
 
-		Edges[i].insertFirst(names[j], w);
-		Edges[j].insertFirst(names[i], w);
+//		Edges[i].insertFirst(names[j], w);
+//		Edges[j].insertFirst(names[i], w);
+		Edges[i].insertFirst(getName(j), w);
+		Edges[j].insertFirst(getName(i), w);
 
 		numEdges++;
 	}
@@ -194,10 +234,13 @@ public class WeightedGraph
 	// Adds a new edge with weight w
 	public void addEdge(String vertex1, String vertex2, double w)
 	{
-		int i = getIndex(vertex1);
-		int j = getIndex(vertex2);
+//		int i = getIndex(vertex1);
+//		int j = getIndex(vertex2);
+//		int i = names.get(vertex1).intValue();
+//		int j = names.get(vertex2).intValue();
 
-		if(i == -1)
+//		if(i == -1)
+		if (!names.containsKey(vertex1))
 		{
 			System.out.print("addEdge failed: ");
 			System.out.print(vertex1);
@@ -205,13 +248,17 @@ public class WeightedGraph
 			return;
 		}
 
-		if(j == -1)
+		if(!names.containsKey(vertex2))
 		{
 			System.out.print("addEdge failed: ");
 			System.out.print(vertex2);
 			System.out.println(" does not exist.");
 			return;
 		}
+		
+		int i = names.get(vertex1).intValue();
+		int j = names.get(vertex2).intValue();
+		//TODO laziness
 
 		addEdge(i, j, w);
 	}
@@ -223,40 +270,48 @@ public class WeightedGraph
 	// String array
 	private String[] getNeighbors(String vertex)
 	{
-		int source = getIndex(vertex);
-		if(source == -1)
+//		int source = getIndex(vertex);
+//		int source = names.get(vertex);
+		if(!names.containsKey(vertex))
 		{
 			System.out.print("getNeighbors failed: Vertex ");
 			System.out.print(vertex);
 			System.out.println(" does not exist.");
 			return null;
 		}
-
+		
+		int source = names.get(vertex);
+		//TODO  laziness
+		
 		return Edges[source].copyIntoArray();
 	}
 
 	// returns the indices of all the neighbors of a given vertex. The
 	// vertex is specified as an index and the neighbors are returned
 	// in an int array 
+//	private int[] getNeighbors(int index)
 	private int[] getNeighbors(int index)
 	{
 		if((index < 0) || (index >= numVertices))
+//		if (!names.containsKey(name))
 		{
 			System.out.print("getNeighbors failed: Index");
-			System.out.print(index);
+//			System.out.print(index);
 			System.out.println(" is out of bounds.");
 			return null;
 		}
 
 		// Call the earlier getNeighbors function to get the names of
 		// neighbors
-		String[] nbrNames = getNeighbors(names[index]);
+		String[] nbrNames = getNeighbors(getName(index));
+//		String[] nbrNames = getNeighbors(name);
 
 		// Turn the array of neighbor names into an array
 		// of neighbor indices
 		int[] nbrIndices = new int[nbrNames.length];
 		for(int i = 0; i < nbrIndices.length; i++)
-			nbrIndices[i] = getIndex(nbrNames[i]);
+//			nbrIndices[i] = getIndex(nbrNames[i]);
+			nbrIndices[i] = names.get(nbrNames[i]);
 
 		return nbrIndices;
 	}
@@ -282,7 +337,8 @@ public class WeightedGraph
 		}
 
 		// Look for vertex j in Edges[i]
-		EdgeLink e = Edges[i].find(names[j]);
+//		EdgeLink e = Edges[i].find(names[j]);
+		EdgeLink e = Edges[i].find(getName(j));
 
 		// If vertex j is found in Edges[i] then return the weight of
 		// the edge, otherwise return null
@@ -301,9 +357,11 @@ public class WeightedGraph
 	public String[] shortestPath(String source, String dest)
 	{
 		// Get index of source
-		int sourceIndex = getIndex(source);
+//		int sourceIndex = getIndex(source);
+		int sourceIndex = names.get(source);
 		// Get index of destination
-		int destIndex = getIndex(dest);
+//		int destIndex = getIndex(dest);
+		int destIndex = names.get(dest);
 
 		if(sourceIndex == -1)
 		{
@@ -329,7 +387,8 @@ public class WeightedGraph
 
 		// Define a String[] for shortest path and place the source vertex in it
 		String[] path = new String[numVertices];
-		path[0] = names[sourceIndex];		
+//		path[0] = names[sourceIndex];		
+		path[0] = getName(sourceIndex);
 
 		// Start following parent pointers and store each new vertex
 		// encountered, in the path array. The while-loop executes
@@ -340,7 +399,8 @@ public class WeightedGraph
 		{
 			currentIndex = spTree[currentIndex];
 			pathLength++;
-			path[pathLength] = names[currentIndex];
+//			path[pathLength] = names[currentIndex];
+			path[pathLength] = getName(currentIndex);
 		}
 
 		// Resize the path array to be exactly of the correct size
@@ -357,9 +417,11 @@ public class WeightedGraph
 	public double shortestPathCost(String source, String dest)
 	{
 		// Get index of source
-		int sourceIndex = getIndex(source);
+//		int sourceIndex = getIndex(source);
+		int sourceIndex = names.get(source);
 		// Get index of destination
-		int destIndex = getIndex(dest);
+//		int destIndex = getIndex(dest);
+		int destIndex = names.get(dest);
 
 		if(sourceIndex == -1)
 		{
@@ -413,7 +475,8 @@ public class WeightedGraph
 	private int[] DSP(String source)
 	{
 
-		int sourceIndex = getIndex(source);
+//		int sourceIndex = getIndex(source);
+		int sourceIndex = names.get(source);
 
 		// Declarations
 		double[] dist = new double[numVertices];
