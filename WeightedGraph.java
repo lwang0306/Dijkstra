@@ -276,7 +276,7 @@ public class WeightedGraph {
 		}
 
 		// Perform DSP from destination
-		int[] spTree = DSP(dest);
+		int[] spTree = DSP(dest, source);
 
 		// If source is unreachable from destination
 		if (spTree[sourceIndex] == -1)
@@ -291,10 +291,15 @@ public class WeightedGraph {
 		// until the root of the tree is encountered
 		int currentIndex = sourceIndex;
 		int pathLength = 0;
+//		int spCurrent = spTree[currentIndex];
+//		nameIndex.put(names[spCurrent], currentIndex);
 		while (currentIndex != spTree[currentIndex]) {
+//			nameIndex.put(names[currentIndex], spTree[currentIndex]);
 			currentIndex = spTree[currentIndex];
 			pathLength++;
 			path[pathLength] = names[currentIndex];
+//			spCurrent = spTree[currentIndex];
+//			nameIndex.put(names[spCurrent], currentIndex);
 		}
 
 		// Resize the path array to be exactly of the correct size
@@ -329,7 +334,7 @@ public class WeightedGraph {
 		}
 
 		// Perform DSP from destination
-		int[] spTree = DSP(dest);
+		int[] spTree = DSP(dest, source);
 
 		// If source is unreachable from destination
 		if (spTree[sourceIndex] == -1)
@@ -358,7 +363,7 @@ public class WeightedGraph {
 	 * source.
 	 */
 
-	private int[] DSP(String source) {
+	private int[] DSP(String source, String dest) {
 
 		int sourceIndex = nameIndex.get(source);
 
@@ -366,7 +371,7 @@ public class WeightedGraph {
 		double[] dist = new double[numVertices];
 		int[] previous = new int[numVertices];
 		VertexHeap Q = new VertexHeap(numVertices);
-
+		
 		// Initializations
 		for (int i = 0; i < numVertices; i++) // Initializations
 		{
@@ -406,8 +411,9 @@ public class WeightedGraph {
 						previous[vIndex] = uIndex;
 						Q.change(heapVIndex, dist[vIndex], uIndex);
 					} // end of if alt < dist[vIndex]
-				}
+				} // end of if heapVIndex != -1
 			} // end of for-loop that scans the neighbors
+			if (nameIndex.get(dest) == uIndex) break;
 		} // end of while-Q-is-not-empty
 
 		return previous;
