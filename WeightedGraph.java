@@ -344,7 +344,9 @@ public class WeightedGraph {
 		String key = "(" + sourceIndex + ", " + destIndex + ")";
 		String[] path;
 		
-		if (computedPath.containsKey(key))
+		if (computedCost.containsKey(key))
+			return computedCost.get(key);
+		else if (computedPath.containsKey(key))
 			path = computedPath.get(key);
 		else {
 		if (sourceIndex == -1) {
@@ -359,27 +361,7 @@ public class WeightedGraph {
 			System.out.print(dest);
 			System.out.println(" does not exist.");
 			return Double.MAX_VALUE;
-		}
-
-//		// Perform DSP from destination
-//		int[] spTree = DSP(dest, source);
-//
-//		// If source is unreachable from destination
-//		if (spTree[sourceIndex] == -1)
-//			return Double.MAX_VALUE;
-//
-//		// Start following parent pointers and store each new vertex
-//		// encountered, in the path array. The while-loop executes
-//		// until the root of the tree is encountered
-//		int currentIndex = sourceIndex;
-//		double pathCost = 0;
-//		while (currentIndex != spTree[currentIndex]) {
-//			pathCost += getWeight(currentIndex, spTree[currentIndex])
-//					.doubleValue();
-//			currentIndex = spTree[currentIndex];
-//		}
-//		
-		
+		}		
 		path = shortestPath(source, dest);
 		computedPath.put(key, path);
 		}
