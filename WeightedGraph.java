@@ -10,6 +10,8 @@ public class WeightedGraph {
 									// vertices
 	private int numVertices;
 	private int numEdges;
+	private Hashtable<String, String[]> computedPath;
+	private Hashtable<String, Double> computedCost;
 
 	// Default constructor. Sets aside enough capacity for one vertex
 	public WeightedGraph() {
@@ -26,6 +28,8 @@ public class WeightedGraph {
 		for (int i = 0; i < capacity; i++) {
 			Edges[i] = new EdgeLinkList();
 		}
+		computedPath = new Hashtable<String, String[]>();
+		computedCost = new Hashtable<String, Double>();
 
 	}
 
@@ -272,7 +276,12 @@ public class WeightedGraph {
 		int sourceIndex = nameIndex.get(source);
 		// Get index of destination
 		int destIndex = nameIndex.get(dest);
-
+		// form a key for (sourceIndex, destIndex)
+		String key = "(" + sourceIndex + ", " + destIndex + ")";
+		
+		if (computedPath.containsKey(key))
+			return computedPath.get(key);
+		else {
 		if (sourceIndex == -1) {
 			System.out.print("shortestPath failed: ");
 			System.out.print(source);
@@ -316,8 +325,11 @@ public class WeightedGraph {
 		String[] newPath = new String[pathLength + 1];
 		for (int i = 0; i < newPath.length; i++)
 			newPath[i] = path[i];
-
-		return newPath;
+		
+		// save the result of existing query into Hashtable
+		computedPath.put(key, newPath);
+		
+		return newPath;}
 	}
 
 	/*
@@ -328,7 +340,13 @@ public class WeightedGraph {
 		int sourceIndex = nameIndex.get(source);
 		// Get index of destination
 		int destIndex = nameIndex.get(dest);
-
+		// form a key for (sourceIndex, destIndex)
+		String key = "(" + sourceIndex + ", " + destIndex + ")";
+		String[] path;
+		
+		if (computedPath.containsKey(key))
+			path = computedPath.get(key);
+		else {
 		if (sourceIndex == -1) {
 			System.out.print("shortestPathCost failed: ");
 			System.out.print(source);
@@ -360,14 +378,18 @@ public class WeightedGraph {
 //					.doubleValue();
 //			currentIndex = spTree[currentIndex];
 //		}
+//		
 		
+		path = shortestPath(source, dest);
+		computedPath.put(key, path);
+		}
 		double pathCost = 0;
-		String[] path = shortestPath(source, dest);
 		for (int i = 0; i < path.length - 1; i++) {
 			int uIndex = nameIndex.get(path[i]);
 			int vIndex = nameIndex.get(path[i + 1]);
 			pathCost += getWeight(uIndex, vIndex);
 		}
+		computedCost.put(key, new Double(pathCost));
 		return pathCost;
 	}
 
