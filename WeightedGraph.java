@@ -237,34 +237,6 @@ public class WeightedGraph {
 		return nbrIndices;
 	}
 
-	// Gets the weight of the edge connecting a pair of vertices
-	// whose indices are given
-	private Double getWeight(int i, int j) {
-		if ((i < 0) || (i > numVertices - 1)) {
-			System.out.print("getWeight failed: ");
-			System.out.print("index " + i);
-			System.out.println(" out of bounds.");
-			return null;
-		}
-
-		if ((j < 0) || (j > numVertices - 1)) {
-			System.out.print("getWeight failed: ");
-			System.out.print("index " + j);
-			System.out.println(" out of bounds.");
-			return null;
-		}
-
-		// Look for vertex j in Edges[i]
-		EdgeLink e = Edges[i].find(names[j]);
-
-		// If vertex j is found in Edges[i] then return the weight of
-		// the edge, otherwise return null
-		if (e != null)
-			return new Double(e.weight);
-		else
-			return null;
-	}
-
 	/*
 	 * Calculates the shortest path from source to dest using Dijkstra's
 	 * Shortest Path. The return value contains the labels of the vertices that
@@ -372,7 +344,7 @@ public class WeightedGraph {
 		for (int i = 0; i < path.length - 1; i++) {
 			int uIndex = getIndex(path[i]);
 			int vIndex = getIndex(path[i + 1]);
-			pathCost += getWeight(uIndex, vIndex);
+			pathCost += getDistance(uIndex, vIndex);
 		}
 		computedCost.put(key, new Double(pathCost));
 		return pathCost;
@@ -434,9 +406,9 @@ public class WeightedGraph {
 				int heapVIndex = Q.getIndex(vIndex);
 				if (heapVIndex != -1) { // this line is added to eliminate
 										// unnecessary work
-					double alt = dist[uIndex] + getWeight(uIndex, vIndex)
+					double alt = dist[uIndex] + getDistance(uIndex, vIndex)
 							+ getDistance(vIndex, destIndex)
-							- getDistance(uIndex, destIndex);
+							- getDistance(uIndex, destIndex);  // implementation of A* Algorithm
 					if (alt < dist[vIndex]) // Relax (u,v)
 					{
 						dist[vIndex] = alt;
