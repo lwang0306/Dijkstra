@@ -44,11 +44,11 @@ public class WeightedGraph {
 	// Finds the location at which a vertex is stored in Vertices.
 	// Returns -1 if vertex not found
 	public int getIndex(String vertex) {
-		for (int i = 0; i < numVertices; i++)
-			if (vertex.equals(names[i]))
-				return i;
-
-		return -1;
+		try {
+			return nameIndex.get(vertex).intValue();
+		} catch (NullPointerException e) {
+			return -1;
+		}
 	}
 
 	// Resizes the array of vertices. Can make it larger or smaller, depending
@@ -127,8 +127,8 @@ public class WeightedGraph {
 	// Adds a new weighted edge. The edge is specified by
 	// indices of endpoints and the weight equals the Euclidean distance.
 	public void addWeightedEdge(String vertex1, String vertex2) {
-		int i = nameIndex.get(vertex1);
-		int j = nameIndex.get(vertex2);
+		int i = getIndex(vertex1);
+		int j = getIndex(vertex2);
 
 		if ((i < 0) || (i > numVertices - 1)) {
 			System.out.print("addEdge failed: ");
@@ -179,8 +179,8 @@ public class WeightedGraph {
 
 	// Adds a new edge with weight w
 	public void addEdge(String vertex1, String vertex2, double w) {
-		int i = nameIndex.get(vertex1);
-		int j = nameIndex.get(vertex2);
+		int i = getIndex(vertex1);
+		int j = getIndex(vertex2);
 
 		if (i == -1) {
 			System.out.print("addEdge failed: ");
@@ -202,7 +202,7 @@ public class WeightedGraph {
 	// returns the names of all the neighbors of a given vertex in a
 	// String array
 	private String[] getNeighbors(String vertex) {
-		int source = nameIndex.get(vertex);
+		int source = getIndex(vertex);
 		if (source == -1) {
 			System.out.print("getNeighbors failed: Vertex ");
 			System.out.print(vertex);
@@ -232,7 +232,7 @@ public class WeightedGraph {
 		// of neighbor indices
 		int[] nbrIndices = new int[nbrNames.length];
 		for (int i = 0; i < nbrIndices.length; i++)
-			nbrIndices[i] = nameIndex.get(nbrNames[i]);
+			nbrIndices[i] = getIndex(nbrNames[i]);
 
 		return nbrIndices;
 	}
@@ -272,9 +272,9 @@ public class WeightedGraph {
 	 */
 	public String[] shortestPath(String source, String dest) {
 		// Get index of source
-		int sourceIndex = nameIndex.get(source);
+		int sourceIndex = getIndex(source);
 		// Get index of destination
-		int destIndex = nameIndex.get(dest);
+		int destIndex = getIndex(dest);
 		// form a key for (sourceIndex, destIndex)
 		String key = "(" + sourceIndex + ", " + destIndex + ")";
 
@@ -340,9 +340,9 @@ public class WeightedGraph {
 	 */
 	public double shortestPathCost(String source, String dest) {
 		// Get index of source
-		int sourceIndex = nameIndex.get(source);
+		int sourceIndex = getIndex(source);
 		// Get index of destination
-		int destIndex = nameIndex.get(dest);
+		int destIndex = getIndex(dest);
 		// form a key for (sourceIndex, destIndex)
 		String key = "(" + sourceIndex + ", " + destIndex + ")";
 		String[] path;
@@ -370,8 +370,8 @@ public class WeightedGraph {
 		}
 		double pathCost = 0;
 		for (int i = 0; i < path.length - 1; i++) {
-			int uIndex = nameIndex.get(path[i]);
-			int vIndex = nameIndex.get(path[i + 1]);
+			int uIndex = getIndex(path[i]);
+			int vIndex = getIndex(path[i + 1]);
 			pathCost += getWeight(uIndex, vIndex);
 		}
 		computedCost.put(key, new Double(pathCost));
@@ -389,7 +389,8 @@ public class WeightedGraph {
 
 	private int[] DSP(String source, String dest) {
 
-		int sourceIndex = nameIndex.get(source);
+		int sourceIndex = getIndex(source);
+		int destIndex = getIndex(dest);
 
 		// Declarations
 		double[] dist = new double[numVertices];
@@ -433,7 +434,9 @@ public class WeightedGraph {
 				int heapVIndex = Q.getIndex(vIndex);
 				if (heapVIndex != -1) { // this line is added to eliminate
 										// unnecessary work
-					double alt = dist[uIndex] + getWeight(uIndex, vIndex);
+					double alt = dist[uIndex] + getWeight(uIndex, vIndex)
+							+ getDistance(vIndex, destIndex)
+							- getDistance(uIndex, destIndex);
 					if (alt < dist[vIndex]) // Relax (u,v)
 					{
 						dist[vIndex] = alt;
@@ -442,7 +445,7 @@ public class WeightedGraph {
 					} // end of if alt < dist[vIndex]
 				} // end of if heapVIndex != -1
 			} // end of for-loop that scans the neighbors
-			if (nameIndex.get(dest) == uIndex)
+			if (getIndex(dest) == uIndex)
 				break;
 		} // end of while-Q-is-not-empty
 
@@ -450,8 +453,33 @@ public class WeightedGraph {
 
 	} // end of function
 
-	public void replaceTwoEdgesWithOneEdge() {
+	/*
+	 * get the weight of straight line between two vertex
+	 */
+	public Double getDistance(int i, int j) {
+		if ((i < 0) || (i > numVertices - 1)) {
+			System.out.print("getWeight failed: ");
+			System.out.print("index " + i);
+			System.out.println(" out of bounds.");
+			return null;
+		}
 
+		if ((j < 0) || (j > numVertices - 1)) {
+			System.out.print("getWeight failed: ");
+			System.out.print("index " + j);
+			System.out.println(" out of bounds.");
+			return null;
+		}
+
+		// calculate distance
+		double x1 = x[i];
+		double y1 = y[i];
+		double x2 = x[j];
+		double y2 = y[j];
+		double diffX = x1 - x2;
+		double diffY = y1 - y2;
+		double dist = Math.sqrt(diffX * diffX + diffY * diffY);
+		return new Double(dist);
 	}
 
 } // end of class
