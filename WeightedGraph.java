@@ -11,8 +11,8 @@ public class WeightedGraph {
 									// vertices
 	private int numVertices;
 	private int numEdges;
-	private Hashtable<String, String[]> computedPath;
-	private Hashtable<String, Double> computedCost;
+	private Hashtable<String, String[]> computedPath;  // Change #4: lazy evaluation
+	private Hashtable<String, Double> computedCost;  // Change #5: lazy evaluation
 
 	// Default constructor. Sets aside enough capacity for one vertex
 	public WeightedGraph() {
