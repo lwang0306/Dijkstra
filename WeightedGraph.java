@@ -40,17 +40,16 @@ public class WeightedGraph {
 	public int numberOfEdges() {
 		return numEdges;
 	}
-	
-	// Finds the location at which a vertex is stored in Vertices. 
-		// Returns -1 if vertex not found
-		public int getIndex(String vertex)
-		{
-			for(int i = 0; i < numVertices; i++)
-				if(vertex.equals(names[i]))
-					return i;
 
-			return -1;
-		}
+	// Finds the location at which a vertex is stored in Vertices.
+	// Returns -1 if vertex not found
+	public int getIndex(String vertex) {
+		for (int i = 0; i < numVertices; i++)
+			if (vertex.equals(names[i]))
+				return i;
+
+		return -1;
+	}
 
 	// Resizes the array of vertices. Can make it larger or smaller, depending
 	// on what newSize is.
@@ -278,58 +277,62 @@ public class WeightedGraph {
 		int destIndex = nameIndex.get(dest);
 		// form a key for (sourceIndex, destIndex)
 		String key = "(" + sourceIndex + ", " + destIndex + ")";
-		
+
 		if (computedPath.containsKey(key))
 			return computedPath.get(key);
 		else {
-		if (sourceIndex == -1) {
-			System.out.print("shortestPath failed: ");
-			System.out.print(source);
-			System.out.println(" does not exist.");
-			return null;
+			if (sourceIndex == -1) {
+				System.out.print("shortestPath failed: ");
+				System.out.print(source);
+				System.out.println(" does not exist.");
+				return null;
+			}
+			if (destIndex == -1) {
+				System.out.print("shortestPath failed: ");
+				System.out.print(dest);
+				System.out.println(" does not exist.");
+				return null;
+			}
+
+			// Perform DSP from destination
+			int[] spTree = DSP(dest, source);
+
+			// If source is unreachable from destination
+			if (spTree[sourceIndex] == -1)
+				return null;
+
+			// Define a String[] for shortest path and place the source vertex
+			// in it
+			String[] path = new String[numVertices];
+			path[0] = names[sourceIndex];
+
+			// Start following parent pointers and store each new vertex
+			// encountered, in the path array. The while-loop executes
+			// until the root of the tree is encountered
+			int currentIndex = sourceIndex;
+			int pathLength = 0;
+			// int spCurrent = spTree[currentIndex];
+			// nameIndex.put(names[spCurrent], currentIndex);
+			while (currentIndex != spTree[currentIndex]) {
+				currentIndex = spTree[currentIndex];
+				if (names[currentIndex] == null)
+					break;
+				// System.out.println("-------- currentIndex = " + currentIndex
+				// + " -------------");
+				pathLength++;
+				path[pathLength] = names[currentIndex];
+			}
+
+			// Resize the path array to be exactly of the correct size
+			String[] newPath = new String[pathLength + 1];
+			for (int i = 0; i < newPath.length; i++)
+				newPath[i] = path[i];
+
+			// save the result of existing query into Hashtable
+			computedPath.put(key, newPath);
+
+			return newPath;
 		}
-		if (destIndex == -1) {
-			System.out.print("shortestPath failed: ");
-			System.out.print(dest);
-			System.out.println(" does not exist.");
-			return null;
-		}
-
-		// Perform DSP from destination
-		int[] spTree = DSP(dest, source);
-
-		// If source is unreachable from destination
-		if (spTree[sourceIndex] == -1)
-			return null;
-
-		// Define a String[] for shortest path and place the source vertex in it
-		String[] path = new String[numVertices];
-		path[0] = names[sourceIndex];
-
-		// Start following parent pointers and store each new vertex
-		// encountered, in the path array. The while-loop executes
-		// until the root of the tree is encountered
-		int currentIndex = sourceIndex;
-		int pathLength = 0;
-//		int spCurrent = spTree[currentIndex];
-//		nameIndex.put(names[spCurrent], currentIndex);
-		while (currentIndex != spTree[currentIndex]) {
-			currentIndex = spTree[currentIndex];
-			if (names[currentIndex] == null) break;
-//			System.out.println("-------- currentIndex = " + currentIndex + " -------------");
-			pathLength++;
-			path[pathLength] = names[currentIndex];
-		}
-
-		// Resize the path array to be exactly of the correct size
-		String[] newPath = new String[pathLength + 1];
-		for (int i = 0; i < newPath.length; i++)
-			newPath[i] = path[i];
-		
-		// save the result of existing query into Hashtable
-		computedPath.put(key, newPath);
-		
-		return newPath;}
 	}
 
 	/*
@@ -343,27 +346,27 @@ public class WeightedGraph {
 		// form a key for (sourceIndex, destIndex)
 		String key = "(" + sourceIndex + ", " + destIndex + ")";
 		String[] path;
-		
+
 		if (computedCost.containsKey(key))
 			return computedCost.get(key);
 		else if (computedPath.containsKey(key))
 			path = computedPath.get(key);
 		else {
-		if (sourceIndex == -1) {
-			System.out.print("shortestPathCost failed: ");
-			System.out.print(source);
-			System.out.println(" does not exist.");
-			return Double.MAX_VALUE;
-		}
+			if (sourceIndex == -1) {
+				System.out.print("shortestPathCost failed: ");
+				System.out.print(source);
+				System.out.println(" does not exist.");
+				return Double.MAX_VALUE;
+			}
 
-		if (destIndex == -1) {
-			System.out.print("shortestPathCost failed: ");
-			System.out.print(dest);
-			System.out.println(" does not exist.");
-			return Double.MAX_VALUE;
-		}		
-		path = shortestPath(source, dest);
-		computedPath.put(key, path);
+			if (destIndex == -1) {
+				System.out.print("shortestPathCost failed: ");
+				System.out.print(dest);
+				System.out.println(" does not exist.");
+				return Double.MAX_VALUE;
+			}
+			path = shortestPath(source, dest);
+			computedPath.put(key, path);
 		}
 		double pathCost = 0;
 		for (int i = 0; i < path.length - 1; i++) {
@@ -392,7 +395,7 @@ public class WeightedGraph {
 		double[] dist = new double[numVertices];
 		int[] previous = new int[numVertices];
 		VertexHeap Q = new VertexHeap(numVertices);
-		
+
 		// Initializations
 		for (int i = 0; i < numVertices; i++) // Initializations
 		{
@@ -417,18 +420,19 @@ public class WeightedGraph {
 			Node u = Q.delete(); // Remove best vertex from priority queue;
 									// returns source on first iteration
 			int uIndex = u.getIdentity();
-			
+
 			// get the neighbors of u
 			int[] nbrs = getNeighbors(uIndex);
-//			if (nbrs.length == 2) {
-//				Edges[nbrs[0]].delete(names[uIndex]);
-//				Edges[nbrs[1]].delete(names[uIndex]);
-//			}
+			// if (nbrs.length == 2) {
+			// Edges[nbrs[0]].delete(names[uIndex]);
+			// Edges[nbrs[1]].delete(names[uIndex]);
+			// }
 
 			for (int j = 0; j < nbrs.length; j++) {
 				int vIndex = nbrs[j];
 				int heapVIndex = Q.getIndex(vIndex);
-				if (heapVIndex != -1) {  // this line is added to eliminate unnecessary work
+				if (heapVIndex != -1) { // this line is added to eliminate
+										// unnecessary work
 					double alt = dist[uIndex] + getWeight(uIndex, vIndex);
 					if (alt < dist[vIndex]) // Relax (u,v)
 					{
@@ -438,15 +442,16 @@ public class WeightedGraph {
 					} // end of if alt < dist[vIndex]
 				} // end of if heapVIndex != -1
 			} // end of for-loop that scans the neighbors
-			if (nameIndex.get(dest) == uIndex) break;
+			if (nameIndex.get(dest) == uIndex)
+				break;
 		} // end of while-Q-is-not-empty
 
 		return previous;
 
 	} // end of function
-	
+
 	public void replaceTwoEdgesWithOneEdge() {
-		
+
 	}
-	
+
 } // end of class
