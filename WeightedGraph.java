@@ -238,6 +238,22 @@ public class WeightedGraph {
 	}
 
 	/*
+	 * get the weight of edge between two vertex
+	 */
+	private Double getWeight(int i, int j) {
+
+		// calculate distance
+		double x1 = x[i];
+		double y1 = y[i];
+		double x2 = x[j];
+		double y2 = y[j];
+		double diffX = x1 - x2;
+		double diffY = y1 - y2;
+		double dist = Math.sqrt(diffX * diffX + diffY * diffY);
+		return new Double(dist);
+	}
+	
+	/*
 	 * Calculates the shortest path from source to dest using Dijkstra's
 	 * Shortest Path. The return value contains the labels of the vertices that
 	 * are visited along the path.
@@ -289,8 +305,6 @@ public class WeightedGraph {
 				currentIndex = spTree[currentIndex];
 				if (names[currentIndex] == null)
 					break;
-				// System.out.println("-------- currentIndex = " + currentIndex
-				// + " -------------");
 				pathLength++;
 				path[pathLength] = names[currentIndex];
 			}
@@ -344,7 +358,7 @@ public class WeightedGraph {
 		for (int i = 0; i < path.length - 1; i++) {
 			int uIndex = getIndex(path[i]);
 			int vIndex = getIndex(path[i + 1]);
-			pathCost += getDistance(uIndex, vIndex);
+			pathCost += getWeight(uIndex, vIndex);
 		}
 		computedCost.put(key, new Double(pathCost));
 		return pathCost;
@@ -396,19 +410,15 @@ public class WeightedGraph {
 
 			// get the neighbors of u
 			int[] nbrs = getNeighbors(uIndex);
-			// if (nbrs.length == 2) {
-			// Edges[nbrs[0]].delete(names[uIndex]);
-			// Edges[nbrs[1]].delete(names[uIndex]);
-			// }
 
 			for (int j = 0; j < nbrs.length; j++) {
 				int vIndex = nbrs[j];
 				int heapVIndex = Q.getIndex(vIndex);
 				if (heapVIndex != -1) { // this line is added to eliminate
 										// unnecessary work
-					double alt = dist[uIndex] + getDistance(uIndex, vIndex)
-							+ getDistance(vIndex, destIndex)
-							- getDistance(uIndex, destIndex);  // implementation of A* Algorithm
+					double alt = dist[uIndex] + getWeight(uIndex, vIndex)
+							+ getWeight(vIndex, destIndex)
+							- getWeight(uIndex, destIndex);  // implementation of A* Algorithm
 					if (alt < dist[vIndex]) // Relax (u,v)
 					{
 						dist[vIndex] = alt;
@@ -418,40 +428,11 @@ public class WeightedGraph {
 				} // end of if heapVIndex != -1
 			} // end of for-loop that scans the neighbors
 			if (getIndex(dest) == uIndex)
-				break;
+				break;  // if destination is met, stop searching
 		} // end of while-Q-is-not-empty
 
 		return previous;
 
 	} // end of function
-
-	/*
-	 * get the weight of straight line between two vertex
-	 */
-	public Double getDistance(int i, int j) {
-		if ((i < 0) || (i > numVertices - 1)) {
-			System.out.print("getWeight failed: ");
-			System.out.print("index " + i);
-			System.out.println(" out of bounds.");
-			return null;
-		}
-
-		if ((j < 0) || (j > numVertices - 1)) {
-			System.out.print("getWeight failed: ");
-			System.out.print("index " + j);
-			System.out.println(" out of bounds.");
-			return null;
-		}
-
-		// calculate distance
-		double x1 = x[i];
-		double y1 = y[i];
-		double x2 = x[j];
-		double y2 = y[j];
-		double diffX = x1 - x2;
-		double diffY = y1 - y2;
-		double dist = Math.sqrt(diffX * diffX + diffY * diffY);
-		return new Double(dist);
-	}
 
 } // end of class
