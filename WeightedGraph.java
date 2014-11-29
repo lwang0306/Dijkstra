@@ -3,7 +3,8 @@ import java.util.Hashtable;
 
 public class WeightedGraph {
 	private String[] names; // 1-d array to store the labels of each vertex
-	private Hashtable<String, Integer> nameIndex;
+	private Hashtable<String, Integer> nameIndex; // Change #1: use better data
+													// structure
 	private double[] x; // 1-d array to store x-coordinate of each vertex
 	private double[] y; // 1-d array to store y-coordinate of each vertex
 	private EdgeLinkList[] Edges; // 1-d array to store adjacencies between
@@ -241,7 +242,7 @@ public class WeightedGraph {
 	 * get the weight of edge between two vertex
 	 */
 	private Double getWeight(int i, int j) {
-
+		// Change #6: remove unnecessary object (an EdgeLink)
 		// calculate distance
 		double x1 = x[i];
 		double y1 = y[i];
@@ -252,7 +253,7 @@ public class WeightedGraph {
 		double dist = Math.sqrt(diffX * diffX + diffY * diffY);
 		return new Double(dist);
 	}
-	
+
 	/*
 	 * Calculates the shortest path from source to dest using Dijkstra's
 	 * Shortest Path. The return value contains the labels of the vertices that
@@ -266,6 +267,8 @@ public class WeightedGraph {
 		// form a key for (sourceIndex, destIndex)
 		String key = "(" + sourceIndex + ", " + destIndex + ")";
 
+		// Change #4: lazy evaluation
+		// do computation only if the query is not performed before
 		if (computedPath.containsKey(key))
 			return computedPath.get(key);
 		else {
@@ -333,6 +336,8 @@ public class WeightedGraph {
 		String key = "(" + sourceIndex + ", " + destIndex + ")";
 		String[] path;
 
+		// Change #5: lazy evaluation
+		// do computation only if the query is not performed before
 		if (computedCost.containsKey(key))
 			return computedCost.get(key);
 		else if (computedPath.containsKey(key))
@@ -414,11 +419,15 @@ public class WeightedGraph {
 			for (int j = 0; j < nbrs.length; j++) {
 				int vIndex = nbrs[j];
 				int heapVIndex = Q.getIndex(vIndex);
-				if (heapVIndex != -1) { // this line is added to eliminate
-										// unnecessary work
+				// Change #2: eliminate unnecessary work
+				// if the vertex has already been counted in path
+				if (heapVIndex != -1) {
+					// Change #7: eliminate unnecessary work
+					// take the right direction into consideration
+					// implementation of A* Algorithm
 					double alt = dist[uIndex] + getWeight(uIndex, vIndex)
 							+ getWeight(vIndex, destIndex)
-							- getWeight(uIndex, destIndex);  // implementation of A* Algorithm
+							- getWeight(uIndex, destIndex);
 					if (alt < dist[vIndex]) // Relax (u,v)
 					{
 						dist[vIndex] = alt;
@@ -427,8 +436,10 @@ public class WeightedGraph {
 					} // end of if alt < dist[vIndex]
 				} // end of if heapVIndex != -1
 			} // end of for-loop that scans the neighbors
+				// Change #3: eliminate unnecessary work
+				// if destination is met, stop searching
 			if (getIndex(dest) == uIndex)
-				break;  // if destination is met, stop searching
+				break;
 		} // end of while-Q-is-not-empty
 
 		return previous;
